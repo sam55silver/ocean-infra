@@ -1,0 +1,14 @@
+---
+- name: Install Utility Packages
+  become: true
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - wget
+      - vim
+      - sudo
+      - htop
+    state: present
+  tags:
+    - utilities

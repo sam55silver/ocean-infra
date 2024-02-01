@@ -1,0 +1,42 @@
+---
+- name: Check if ssilver user exists
+  become: true
+  shell: getent passwd ssilver
+  register: ssilver_user_check
+  changed_when: false
+  ignore_errors: true
+
+- name: Create user ssilver with home directory
+  become: true
+  user:
+    name: ssilver
+    group: ssilver
+    groups: sudo
+    createhome: yes
+    password: "{{ SSILVER_PASSWORD | password_hash('sha512') }}"
+  when: ssilver_user_check.rc != 0
+  tags:
+    - users
+
+- name: Create .ssh directory in ssilver's home
+  become: true
+  file:
+    path: /home/ssilver/.ssh
+    state: directory
+    owner: ssilver
+    group: ssilver
+    mode: '0700'
+  tags:
+    - users
+
+- name: Copy root's authorized_keys to ssilver user
+  become: true
+  copy:
+    src: /root/.ssh/authorized_keys
+    dest: /home/ssilver/.ssh/authorized_keys
+    owner: ssilver
+    group: ssilver
+    mode: '0600'
+  when: not (lookup('file', '/home/ssilver/.ssh/authorized_keys') | default('') | length > 0)
+  tags:
+    - users

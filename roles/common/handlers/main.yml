@@ -1,0 +1,6 @@
+---
+- name: Restart Docker Service
+  become: true
+  systemd:
+    name: docker
+    state: restarted

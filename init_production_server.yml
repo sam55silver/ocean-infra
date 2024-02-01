@@ -1,0 +1,15 @@
+---
+- name: Run Common Role
+  hosts: production
+  become: true
+  vars_prompt:
+    - name: SSILVER_PASSWORD
+      prompt: "Enter the password for ssilver user"
+      private: yes
+  roles:
+    - common
+  tags:
+    - common
+    - utilities
+    - docker
+    - users
