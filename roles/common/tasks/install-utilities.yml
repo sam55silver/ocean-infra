@@ -9,6 +9,10 @@
       - vim
       - sudo
       - htop
+      - fish
+      - tmux
+      - git
     state: present
+    update_cache: true
   tags:
     - utilities

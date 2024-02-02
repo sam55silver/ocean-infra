@@ -5,15 +5,25 @@
   register: ssilver_user_check
   changed_when: false
   ignore_errors: true
+  tags:
+    - users
+
+- name: Create group docker
+  group:
+    name: docker
+    state: present
+  when: ssilver_user_check.rc != 0
+  become: yes
+  tags:
+    - users
 
 - name: Create user ssilver with home directory
   become: true
   user:
     name: ssilver
-    group: ssilver
-    groups: sudo
-    createhome: yes
+    groups: sudo,docker
     password: "{{ SSILVER_PASSWORD | password_hash('sha512') }}"
+    shell: /usr/bin/fish
   when: ssilver_user_check.rc != 0
   tags:
     - users
@@ -29,6 +39,11 @@
   tags:
     - users
 
+- name: Check if authorized_keys file exists
+  stat:
+    path: "/home/ssilver/.ssh/authorized_keys"
+  register: authorized_keys_stat
+
 - name: Copy root's authorized_keys to ssilver user
   become: true
   copy:
@@ -37,6 +52,45 @@
     owner: ssilver
     group: ssilver
     mode: '0600'
-  when: not (lookup('file', '/home/ssilver/.ssh/authorized_keys') | default('') | length > 0)
+  when: not authorized_keys_stat 
+  tags:
+    - users
+
+- name: Check if dotfiles exists
+  stat:
+    path: "/home/ssilver/dotfiles"
+  register: dotfiles_stat
+  tags:
+    - users
+  
+- name: Clone GitHub repository
+  git:
+    repo: "https://github.com/sam55silver/dotfiles.git"
+    dest: "/home/ssilver/dotfiles"
+  when: dotfiles_status.stat.exists is not defined or not dotfiles_status.stat.exists
+  become: yes
+  tags:
+    - users
+
+- name: Change ownership of dotfiles report to user ssilver and group ssilver
+  file:
+    path: "/home/ssilver/dotfiles"
+    owner: ssilver
+    group: ssilver
+    recurse: yes
+  when: dotfiles_status.stat.exists is not defined or not dotfiles_status.stat.exists
+  become: yes
+  tags:
+    - users
+
+- name: Copy contents of config directory
+  copy:
+    src: "/home/ssilver/dotfiles/config/"
+    dest: "/home/ssilver/.config/"
+    owner: ssilver
+    group: ssilver
+    remote_src: yes
+  when: dotfiles_status.stat.exists is not defined or not dotfiles_status.stat.exists
+  become: yes
   tags:
     - users

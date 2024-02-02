@@ -29,7 +29,7 @@
   become: true
   lineinfile:
     path: /etc/apt/sources.list.d/docker.list
-    line: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_codename }} stable"
+    line: "deb [arch={{ server_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ distribution_codename }} stable"
     create: yes
   tags:
     - docker
@@ -37,7 +37,6 @@
 - name: Install Docker packages
   become: true
   apt:
-    update_cache: yes
     name:
       - docker-ce
       - docker-ce-cli
@@ -45,6 +44,7 @@
       - docker-buildx-plugin
       - docker-compose-plugin
     state: present
+    update_cache: yes
   tags:
     - docker
 

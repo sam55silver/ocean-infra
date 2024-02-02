@@ -1,11 +1,14 @@
 ---
 - name: Run Common Role
-  hosts: production
+  hosts: the-ocean
   become: true
   vars_prompt:
     - name: SSILVER_PASSWORD
       prompt: "Enter the password for ssilver user"
       private: yes
+  vars:
+    distribution_codename: bookworm 
+    server_architecture: amd64
   roles:
     - common
   tags:
