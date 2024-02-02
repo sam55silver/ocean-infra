@@ -43,15 +43,63 @@
     user: "{{ grafana_uid.stdout }}:{{ grafana_gid.stdout }}"
     volumes:
       - /data/grafana:/var/lib/grafana
+    labels:
+      traefik.http.routers.grafana.tls: "true"
+
+- name: Create Traefik user
+  become: true
+  user:
+    name: traefik
+    groups: docker
+    create_home: false
+  tags:
+    - docker
+
+- name: Create Traefik Config Directory
+  become: true
+  file:
+    path: /configs/traefik
+    state: directory
+    owner: traefik
+    group: traefik
+  tags:
+    - docker
+
+- name: Copy Traefik Config over
+  copy:
+    src: traefik.yml
+    dest: /configs/traefik
+
+- name: Get Traefik UID
+  shell: id -u traefik
+  register: traefik_uid
+
+- name: Get Traefik GID
+  shell: id -g traefik
+  register: traefik_gid
 
 - name: Create Traefik container
   community.docker.docker_container:
     name: traefik
     image: traefik:v2.10
-    command: --api.insecure=true --providers.docker
     ports: 
       - 80:80
-      - 8080:8080
+      - 443:443
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /configs/traefik:/etc/traefik:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.entrypoints: http
+      traefik.http.routers.traefik.rule: Host(`traefik.samsilver.ca`)
+      traefik.http.routers.traefik-secure.entrypoints: https
+      traefik.http.routers.traefik-secure.rule: Host(`traefik.samsilver.ca`)
+      traefik.http.routers.traefik-secure.tls: "true"
+      traefik.http.routers.traefik-secure.tls.certificates[0].certFile: /ect/traefik/samsilver.ca.pem
+      traefik.http.routers.traefik-secure.tls.certificates[0].keyFile: /ect/traefik/private-key.pem
+      traefik.http.routers.traefik-secure.tls.domains[0].main: samsilver.ca
+      traefik.http.routers.traefik-secure.tls.domains[0].sans: "*.samsilver.ca"
+      traefik.http.routers.traefik-secure.tls.service: api@internal
+
+
 
