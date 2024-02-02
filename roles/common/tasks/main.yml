@@ -10,3 +10,8 @@
 - import_tasks: install-docker.yml
   tags:
     - docker
+
+- import_tasks: spawn-docker-containers.yml
+  tags:
+    - docker
+    - containers

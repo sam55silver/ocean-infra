@@ -1,0 +1,57 @@
+---
+- name: Create Grafana user
+  become: true
+  user:
+    name: grafana
+    create_home: false
+  tags:
+    - docker
+
+- name: Create Grafana Data Directory
+  become: true
+  file:
+    path: /data/grafana
+    state: directory
+    owner: grafana
+    group: grafana
+  tags:
+    - docker
+
+- name: Create Grafana Config Directory
+  become: true
+  file:
+    path: /configs/grafana
+    state: directory
+    owner: grafana
+    group: grafana
+  tags:
+    - docker
+
+- name: Get Grafana UID
+  shell: id -u grafana
+  register: grafana_uid
+
+- name: Get Grafana GID
+  shell: id -g grafana
+  register: grafana_gid
+
+- name: Create Grafana container
+  community.docker.docker_container:
+    name: grafana
+    image: grafana/grafana:10.3.1
+    ports: 3000:3000
+    user: "{{ grafana_uid.stdout }}:{{ grafana_gid.stdout }}"
+    volumes:
+      - /data/grafana:/var/lib/grafana
+
+- name: Create Traefik container
+  community.docker.docker_container:
+    name: traefik
+    image: traefik:v2.10
+    command: --api.insecure=true --providers.docker
+    ports: 
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+

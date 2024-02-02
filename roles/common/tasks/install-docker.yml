@@ -56,3 +56,19 @@
     state: started
   tags:
     - docker
+
+- name: Create directory for docker configs
+  become: true
+  file:
+    path: /configs
+    state: directory
+  tags:
+    - docker
+
+- name: Create directory for docker data
+  become: true
+  file:
+    path: /data
+    state: directory
+  tags:
+    - docker

@@ -69,17 +69,7 @@
     dest: "/home/ssilver/dotfiles"
   when: dotfiles_status.stat.exists is not defined or not dotfiles_status.stat.exists
   become: yes
-  tags:
-    - users
-
-- name: Change ownership of dotfiles report to user ssilver and group ssilver
-  file:
-    path: "/home/ssilver/dotfiles"
-    owner: ssilver
-    group: ssilver
-    recurse: yes
-  when: dotfiles_status.stat.exists is not defined or not dotfiles_status.stat.exists
-  become: yes
+  become_user: ssilver
   tags:
     - users
 
@@ -92,5 +82,6 @@
     remote_src: yes
   when: dotfiles_status.stat.exists is not defined or not dotfiles_status.stat.exists
   become: yes
+  become_user: ssilver
   tags:
     - users
