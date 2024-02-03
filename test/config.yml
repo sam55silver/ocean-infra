@@ -1,0 +1,6 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/samsilver.ca.pem
+        keyFile: /certs/samsilver.ca.key

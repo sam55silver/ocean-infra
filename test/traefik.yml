@@ -9,7 +9,7 @@ providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
   file:
-    directory: /etc/traefik/cert-config
+    directory: /certs/
     watch: true
   
 

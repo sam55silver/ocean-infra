@@ -85,3 +85,19 @@
   become_user: ssilver
   tags:
     - users
+
+- name: Create directory for docker configs
+  become: true
+  file:
+    path: /home/ssilver/configs
+    owner: ssilver
+    group: docker
+    state: directory
+
+- name: Create directory for docker data
+  become: true
+  file:
+    path: /data
+    owner: ssilver
+    group: docker
+    state: /home/ssilver/directory

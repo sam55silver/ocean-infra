@@ -10,17 +10,7 @@
 - name: Create Grafana Data Directory
   become: true
   file:
-    path: /data/grafana
-    state: directory
-    owner: grafana
-    group: grafana
-  tags:
-    - docker
-
-- name: Create Grafana Config Directory
-  become: true
-  file:
-    path: /configs/grafana
+    path: /home/ssilver/data/grafana
     state: directory
     owner: grafana
     group: grafana
@@ -42,15 +32,15 @@
     ports: 3000:3000
     user: "{{ grafana_uid.stdout }}:{{ grafana_gid.stdout }}"
     volumes:
-      - /data/grafana:/var/lib/grafana
+      - /home/ssilver/data/grafana:/var/lib/grafana
     labels:
       traefik.http.routers.grafana.tls: "true"
+      traefik.http.routers.grafana.rule: Host(`grafana.samsilver.ca`)
 
 - name: Create Traefik user
   become: true
   user:
     name: traefik
-    groups: docker
     create_home: false
   tags:
     - docker
@@ -58,7 +48,7 @@
 - name: Create Traefik Config Directory
   become: true
   file:
-    path: /configs/traefik
+    path: /home/ssilver/configs/traefik
     state: directory
     owner: traefik
     group: traefik
@@ -68,7 +58,12 @@
 - name: Copy Traefik Config over
   copy:
     src: traefik.yml
-    dest: /configs/traefik
+    dest: /home/ssilver/configs/traefik/
+
+- name: Copy Traefik Certificates Config over
+  copy:
+    src: cert-config.yml
+    dest: /home/ssilver/configs/traefik/
 
 - name: Get Traefik UID
   shell: id -u traefik
@@ -86,20 +81,14 @@
       - 80:80
       - 443:443
     volumes:
-      - /configs/traefik:/etc/traefik:ro
+      - /home/ssilver/configs/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /home/ssilver/configs/traefik/cert-config.yml:/etc/traefik/cert-config/config.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
-      traefik.enable: "true"
-      traefik.http.routers.traefik.entrypoints: http
-      traefik.http.routers.traefik.rule: Host(`traefik.samsilver.ca`)
-      traefik.http.routers.traefik-secure.entrypoints: https
-      traefik.http.routers.traefik-secure.rule: Host(`traefik.samsilver.ca`)
-      traefik.http.routers.traefik-secure.tls: "true"
-      traefik.http.routers.traefik-secure.tls.certificates[0].certFile: /ect/traefik/samsilver.ca.pem
-      traefik.http.routers.traefik-secure.tls.certificates[0].keyFile: /ect/traefik/private-key.pem
-      traefik.http.routers.traefik-secure.tls.domains[0].main: samsilver.ca
-      traefik.http.routers.traefik-secure.tls.domains[0].sans: "*.samsilver.ca"
-      traefik.http.routers.traefik-secure.tls.service: api@internal
-
+      traefik.http.routers.dashboard.rule: Host(`traefik.samsilver.ca`)"
+      traefik.http.routers.dashboard.tls: "true"
+      traefik.http.routers.dashboard.service: api@internal
+      # traefik.http.routers.dashboard.middlewares: auth
+      # traefik.http.middlewares.auth.basicauth.usersFile: /certs/users
 
 
