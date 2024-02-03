@@ -1,42 +1,4 @@
 ---
-- name: Create Grafana user
-  become: true
-  user:
-    name: grafana
-    create_home: false
-  tags:
-    - docker
-
-- name: Create Grafana Data Directory
-  become: true
-  file:
-    path: /home/ssilver/data/grafana
-    state: directory
-    owner: grafana
-    group: grafana
-  tags:
-    - docker
-
-- name: Get Grafana UID
-  shell: id -u grafana
-  register: grafana_uid
-
-- name: Get Grafana GID
-  shell: id -g grafana
-  register: grafana_gid
-
-- name: Create Grafana container
-  community.docker.docker_container:
-    name: grafana
-    image: grafana/grafana:10.3.1
-    ports: 3000:3000
-    user: "{{ grafana_uid.stdout }}:{{ grafana_gid.stdout }}"
-    volumes:
-      - /home/ssilver/data/grafana:/var/lib/grafana
-    labels:
-      traefik.http.routers.grafana.tls: "true"
-      traefik.http.routers.grafana.rule: Host(`grafana.samsilver.ca`)
-
 - name: Create Traefik user
   become: true
   user:
@@ -83,12 +45,49 @@
     volumes:
       - /home/ssilver/configs/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - /home/ssilver/configs/traefik/cert-config.yml:/etc/traefik/cert-config/config.yml:ro
+      - /home/ssilver/certs:/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
-      traefik.http.routers.dashboard.rule: Host(`traefik.samsilver.ca`)"
+      traefik.http.routers.dashboard.rule: "Host(`traefik.samsilver.ca`)"
       traefik.http.routers.dashboard.tls: "true"
       traefik.http.routers.dashboard.service: api@internal
-      # traefik.http.routers.dashboard.middlewares: auth
-      # traefik.http.middlewares.auth.basicauth.usersFile: /certs/users
+      traefik.http.routers.dashboard.middlewares: auth
+      traefik.http.middlewares.auth.basicauth.users: "ssilver:{{ SSILVER_PASSWORD | password_hash('md5') }}"
 
+- name: Create Grafana user
+  become: true
+  user:
+    name: grafana
+    create_home: false
+  tags:
+    - docker
 
+- name: Create Grafana Data Directory
+  become: true
+  file:
+    path: /home/ssilver/data/grafana
+    state: directory
+    owner: grafana
+    group: grafana
+  tags:
+    - docker
+
+- name: Get Grafana UID
+  shell: id -u grafana
+  register: grafana_uid
+
+- name: Get Grafana GID
+  shell: id -g grafana
+  register: grafana_gid
+
+- name: Create Grafana container
+  community.docker.docker_container:
+    name: grafana
+    image: grafana/grafana:10.3.1
+    ports: 3000:3000
+    user: "{{ grafana_uid.stdout }}:{{ grafana_gid.stdout }}"
+    volumes:
+      - /home/ssilver/data/grafana:/var/lib/grafana
+    labels:
+      traefik.http.routers.grafana.tls: "true"
+      traefik.http.routers.grafana.rule: "Host(`grafana.samsilver.ca`)"

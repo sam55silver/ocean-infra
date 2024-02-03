@@ -97,7 +97,15 @@
 - name: Create directory for docker data
   become: true
   file:
-    path: /data
+    path: /home/ssilver/data
     owner: ssilver
     group: docker
-    state: /home/ssilver/directory
+    state: directory
+
+- name: Create directory for certificates
+  become: true
+  file:
+    path: /home/ssilver/certs
+    owner: ssilver
+    group: docker
+    state: directory
