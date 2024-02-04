@@ -51,8 +51,10 @@
       traefik.http.routers.dashboard.rule: "Host(`traefik.samsilver.ca`)"
       traefik.http.routers.dashboard.tls: "true"
       traefik.http.routers.dashboard.service: api@internal
-      traefik.http.routers.dashboard.middlewares: auth
-      traefik.http.middlewares.auth.basicauth.users: "ssilver:{{ SSILVER_PASSWORD | password_hash('md5') }}"
+      traefik.http.routers.dashboard.middlewares: dashboard-auth
+      traefik.http.middlewares.dashboard-auth.basicauth.users: "ssilver:{{ SSILVER_PASSWORD | password_hash('md5') }}"
+
+
 
 - name: Create Grafana user
   become: true
@@ -91,3 +93,37 @@
     labels:
       traefik.http.routers.grafana.tls: "true"
       traefik.http.routers.grafana.rule: "Host(`grafana.samsilver.ca`)"
+
+- name: Copy loki Config over
+  copy:
+    src: loki-config.yml
+    dest: /home/ssilver/configs/loki/
+
+- name: Create Loki container
+  community.docker.docker_container:
+    name: loki
+    image: grafana/loki:2.9.4
+    ports: 3100:3100
+    volumes:
+      - /home/ssilver/configs/loki/loki-config.yml:/etc/loki/local-config.yaml
+
+- name: Copy Promtail Config over
+  copy:
+    src: promtail-config.yml
+    dest: /home/ssilver/configs/promtail/
+
+- name: Create Promtail container
+  community.docker.docker_container:
+    name: promtail
+    image: grafana/promtail:2.9.4
+    volumes:
+      - /home/ssilver/configs/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log
+
+- name: Create logging network
+  community.docker.docker_network:
+    name: logging
+    connected:
+      - grafana
+      - loki
+      - promtail
