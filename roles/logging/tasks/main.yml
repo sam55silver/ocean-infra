@@ -1,68 +1,11 @@
 ---
-- name: Create Traefik user
-  become: true
-  user:
-    name: traefik
-    create_home: false
-  tags:
-    - docker
-
-- name: Create Traefik Config Directory
-  become: true
-  file:
-    path: /home/ssilver/configs/traefik
-    state: directory
-    owner: traefik
-    group: traefik
-  tags:
-    - docker
-
-- name: Copy Traefik Config over
-  copy:
-    src: traefik.yml
-    dest: /home/ssilver/configs/traefik/
-
-- name: Copy Traefik Certificates Config over
-  copy:
-    src: cert-config.yml
-    dest: /home/ssilver/configs/traefik/
-
-- name: Get Traefik UID
-  shell: id -u traefik
-  register: traefik_uid
-
-- name: Get Traefik GID
-  shell: id -g traefik
-  register: traefik_gid
-
-- name: Create Traefik container
-  community.docker.docker_container:
-    name: traefik
-    image: traefik:v2.10
-    ports: 
-      - 80:80
-      - 443:443
-    volumes:
-      - /home/ssilver/configs/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - /home/ssilver/configs/traefik/cert-config.yml:/etc/traefik/cert-config/config.yml:ro
-      - /home/ssilver/certs:/certs
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    labels:
-      traefik.http.routers.dashboard.rule: "Host(`traefik.samsilver.ca`)"
-      traefik.http.routers.dashboard.tls: "true"
-      traefik.http.routers.dashboard.service: api@internal
-      traefik.http.routers.dashboard.middlewares: dashboard-auth
-      traefik.http.middlewares.dashboard-auth.basicauth.users: "ssilver:{{ SSILVER_PASSWORD | password_hash('md5') }}"
-
-
-
 - name: Create Grafana user
   become: true
   user:
     name: grafana
     create_home: false
   tags:
-    - docker
+    - grafana
 
 - name: Create Grafana Data Directory
   become: true
@@ -72,15 +15,19 @@
     owner: grafana
     group: grafana
   tags:
-    - docker
+    - grafana
 
 - name: Get Grafana UID
   shell: id -u grafana
   register: grafana_uid
+  tags:
+    - grafana
 
 - name: Get Grafana GID
   shell: id -g grafana
   register: grafana_gid
+  tags:
+    - grafana
 
 - name: Create Grafana container
   community.docker.docker_container:
@@ -93,6 +40,9 @@
     labels:
       traefik.http.routers.grafana.tls: "true"
       traefik.http.routers.grafana.rule: "Host(`grafana.samsilver.ca`)"
+    restart_policy: "always"
+  tags:
+    - grafana
 
 - name: Copy loki Config over
   copy:
@@ -106,11 +56,16 @@
     ports: 3100:3100
     volumes:
       - /home/ssilver/configs/loki/loki-config.yml:/etc/loki/local-config.yaml
+    labels:
+      traefik.enable: "false"
+    restart_policy: "always"
 
 - name: Copy Promtail Config over
   copy:
     src: promtail-config.yml
     dest: /home/ssilver/configs/promtail/
+  tags:
+    - promtail
 
 - name: Create Promtail container
   community.docker.docker_container:
@@ -119,8 +74,14 @@
     volumes:
       - /home/ssilver/configs/promtail/promtail-config.yml:/etc/promtail/config.yml
       - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    labels:
+      traefik.enable: "false"
+    restart_policy: "always"
+  tags:
+    - promtail
 
-- name: Create logging network
+- name: Create and connect logging network
   community.docker.docker_network:
     name: logging
     connected:

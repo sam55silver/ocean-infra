@@ -1,0 +1,76 @@
+---
+- name: Create Traefik user
+  become: true
+  user:
+    name: traefik
+    create_home: false
+  tags:
+    - docker
+
+- name: Create directory for certificates
+  become: true
+  file:
+    path: /home/ssilver/certs
+    owner: ssilver
+    group: docker
+    state: directory
+
+- name: Create Traefik Config Directory
+  become: true
+  file:
+    path: /home/ssilver/configs/traefik
+    state: directory
+    owner: traefik
+    group: traefik
+  tags:
+    - docker
+
+- name: Copy Traefik Config over
+  copy:
+    src: traefik.yml
+    dest: /home/ssilver/configs/traefik/
+
+- name: Copy Traefik Certificates Config over
+  copy:
+    src: cert-config.yml
+    dest: /home/ssilver/configs/traefik/
+
+- name: Copy Cert over
+  copy:
+    src: cloudflare.cert
+    dest: /home/ssilver/certs/cloudflare.cert
+
+- name: Copy Cert Key over
+  copy:
+    src: cloudflare.key
+    dest: /home/ssilver/certs/cloudflare.key
+
+- name: Get Traefik UID
+  shell: id -u traefik
+  register: traefik_uid
+
+- name: Get Traefik GID
+  shell: id -g traefik
+  register: traefik_gid
+
+- name: Create Traefik container
+  community.docker.docker_container:
+    name: traefik
+    image: traefik:v2.10
+    ports: 
+      - 80:80
+      - 443:443
+    volumes:
+      - /home/ssilver/configs/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /home/ssilver/configs/traefik/cert-config.yml:/etc/traefik/cert-config/config.yml:ro
+      - /home/ssilver/certs:/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      traefik.http.routers.dashboard.rule: "Host(`traefik.samsilver.ca`)"
+      traefik.http.routers.dashboard.tls: "true"
+      traefik.http.routers.dashboard.service: api@internal
+      traefik.http.routers.dashboard.middlewares: dashboard-auth
+      traefik.http.middlewares.dashboard-auth.basicauth.users: "ssilver:{{ SSILVER_PASSWORD | password_hash('md5') }}"
+    restart_policy: "always"
+  notify:
+    - Restart Docker Service

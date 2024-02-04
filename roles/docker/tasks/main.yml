@@ -4,17 +4,6 @@
   apt_key:
     url: https://download.docker.com/linux/debian/gpg
     state: present
-  tags:
-    - docker
-
-- name: Create directory for apt keyrings
-  become: true
-  file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: '0755'
-  tags:
-    - docker
 
 - name: Download Docker GPG key
   become: true
@@ -22,8 +11,6 @@
     url: https://download.docker.com/linux/debian/gpg
     dest: /etc/apt/keyrings/docker.asc
     mode: '0644'
-  tags:
-    - docker
 
 - name: Add Docker repository to Apt sources
   become: true
@@ -31,8 +18,6 @@
     path: /etc/apt/sources.list.d/docker.list
     line: "deb [arch={{ server_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ distribution_codename }} stable"
     create: yes
-  tags:
-    - docker
 
 - name: Install Docker packages
   become: true
@@ -45,8 +30,6 @@
       - docker-compose-plugin
     state: present
     update_cache: yes
-  tags:
-    - docker
 
 - name: Enable and Start Docker service
   become: true
@@ -54,6 +37,44 @@
     name: docker
     enabled: yes
     state: started
-  tags:
-    - docker
 
+- name: Add ssilver to docker group
+  become: true
+  user:
+    name: ssilver
+    groups: docker
+    append: true
+
+- name: Create directory for docker configs
+  become: true
+  file:
+    path: /home/ssilver/configs
+    owner: ssilver
+    group: docker
+    state: directory
+
+- name: Create directory for docker data
+  become: true
+  file:
+    path: /home/ssilver/data
+    owner: ssilver
+    group: docker
+    state: directory
+
+- name: Install loki plugin for docker
+  community.docker.docker_plugin:
+    plugin_name: grafana/loki-docker-driver:2.9.4
+    alias: loki
+    state: enable
+
+- name: Copy over daemon.json
+  copy:
+    src: daemon.json
+    dest: /etc/docker/
+  register: copy_result
+
+- name: Restart Docker if copy is completed
+  service:
+    name: docker
+    state: restarted
+  when: copy_result.changed

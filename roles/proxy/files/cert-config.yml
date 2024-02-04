@@ -1,0 +1,6 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/cloudflare.cert
+        keyFile: /certs/cloudflare.key

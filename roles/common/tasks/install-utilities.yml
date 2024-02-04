@@ -14,5 +14,3 @@
       - git
     state: present
     update_cache: true
-  tags:
-    - utilities

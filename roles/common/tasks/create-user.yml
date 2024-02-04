@@ -1,32 +1,18 @@
 ---
-- name: Check if ssilver user exists
-  become: true
-  shell: getent passwd ssilver
-  register: ssilver_user_check
-  changed_when: false
-  ignore_errors: true
-  tags:
-    - users
-
-- name: Create group docker
-  group:
-    name: docker
-    state: present
-  when: ssilver_user_check.rc != 0
-  become: yes
-  tags:
-    - users
-
+- name: Check if the ssilver already exists
+  getent:
+    database: passwd
+    key: ssilver
+  register: ssilver_existing
+  
 - name: Create user ssilver with home directory
   become: true
   user:
     name: ssilver
-    groups: sudo,docker
+    groups: sudo
     password: "{{ SSILVER_PASSWORD | password_hash('sha512') }}"
     shell: /usr/bin/fish
-  when: ssilver_user_check.rc != 0
-  tags:
-    - users
+  when: not ( "ssilver" in getent_passwd.keys() )
 
 - name: Create .ssh directory in ssilver's home
   become: true
@@ -36,8 +22,6 @@
     owner: ssilver
     group: ssilver
     mode: '0700'
-  tags:
-    - users
 
 - name: Check if authorized_keys file exists
   stat:
@@ -53,15 +37,11 @@
     group: ssilver
     mode: '0600'
   when: not authorized_keys_stat 
-  tags:
-    - users
 
 - name: Check if dotfiles exists
   stat:
     path: "/home/ssilver/dotfiles"
   register: dotfiles_stat
-  tags:
-    - users
   
 - name: Clone GitHub repository
   git:
@@ -70,8 +50,6 @@
   when: dotfiles_status.stat.exists is not defined or not dotfiles_status.stat.exists
   become: yes
   become_user: ssilver
-  tags:
-    - users
 
 - name: Copy contents of config directory
   copy:
@@ -83,29 +61,3 @@
   when: dotfiles_status.stat.exists is not defined or not dotfiles_status.stat.exists
   become: yes
   become_user: ssilver
-  tags:
-    - users
-
-- name: Create directory for docker configs
-  become: true
-  file:
-    path: /home/ssilver/configs
-    owner: ssilver
-    group: docker
-    state: directory
-
-- name: Create directory for docker data
-  become: true
-  file:
-    path: /home/ssilver/data
-    owner: ssilver
-    group: docker
-    state: directory
-
-- name: Create directory for certificates
-  become: true
-  file:
-    path: /home/ssilver/certs
-    owner: ssilver
-    group: docker
-    state: directory

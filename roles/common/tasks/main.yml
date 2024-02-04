@@ -1,17 +1,8 @@
 ---
-# - import_tasks: install-utilities.yml
-#   tags:
-#     - utilities
-#
-# - import_tasks: create-user.yml
-#   tags:
-#     - users
-#
-# - import_tasks: install-docker.yml
-#   tags:
-#     - docker
-
-- import_tasks: spawn-docker-containers.yml
+- import_tasks: install-utilities.yml
   tags:
-    - docker
-    - containers
+    - utilities
+
+- import_tasks: create-user.yml
+  tags:
+    - users

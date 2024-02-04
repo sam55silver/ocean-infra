@@ -1,5 +1,5 @@
 ---
-- name: Run Common Role
+- name: Run Full infra Install
   hosts: the-ocean
   become: true
   vars_prompt:
@@ -11,8 +11,6 @@
     server_architecture: amd64
   roles:
     - common
-  tags:
-    - common
-    - utilities
     - docker
-    - users
+    - proxy
+    - logging
