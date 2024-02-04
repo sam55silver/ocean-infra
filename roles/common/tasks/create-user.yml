@@ -1,9 +1,7 @@
 ---
-- name: Check if the ssilver already exists
+- name: Get db of users
   getent:
     database: passwd
-    key: ssilver
-  register: ssilver_existing
   
 - name: Create user ssilver with home directory
   become: true
