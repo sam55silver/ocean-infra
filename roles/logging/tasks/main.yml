@@ -17,6 +17,14 @@
   tags:
     - grafana
 
+- name: Copy over datasources for Grafana
+  become: true
+  copy:
+    src: grafana-datasources.yml
+    dest: /home/ssilver/configs/grafana/
+  tags:
+    - grafana
+
 - name: Get Grafana UID
   shell: id -u grafana
   register: grafana_uid
@@ -37,6 +45,7 @@
     user: "{{ grafana_uid.stdout }}:{{ grafana_gid.stdout }}"
     volumes:
       - /home/ssilver/data/grafana:/var/lib/grafana
+      - /home/ssilver/configs/grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/automatic.yml
     labels:
       traefik.http.routers.grafana.tls: "true"
       traefik.http.routers.grafana.rule: "Host(`grafana.samsilver.ca`)"
@@ -48,6 +57,8 @@
   copy:
     src: loki-config.yml
     dest: /home/ssilver/configs/loki/
+  tags:
+    - loki
 
 - name: Create Loki container
   community.docker.docker_container:
@@ -59,6 +70,8 @@
     labels:
       traefik.enable: "false"
     restart_policy: "always"
+  tags:
+    - loki
 
 - name: Copy Promtail Config over
   copy:
@@ -116,6 +129,7 @@
     restart_policy: "always"
   tags:
     - prometheus
+    - cadvisor
 
 - name: Create and connect logging network
   community.docker.docker_network:
@@ -127,5 +141,8 @@
       - prometheus
       - cadvisor
   tags:
+    - grafana
+    - loki
+    - promtail
     - prometheus
-
+    - cadvisor
