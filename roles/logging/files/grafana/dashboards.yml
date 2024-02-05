@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: Docker Containers' Metrics
+    folder: Metrics
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards/docker-metrics
+  - name: Node Metrics
+    folder: Metrics
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards/node-metrics

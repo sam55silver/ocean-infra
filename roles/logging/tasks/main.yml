@@ -17,11 +17,11 @@
   tags:
     - grafana
 
-- name: Copy over datasources for Grafana
+- name: Copy over datasources and dashboards for Grafana
   become: true
   copy:
-    src: grafana-datasources.yml
-    dest: /home/ssilver/configs/grafana/
+    src: grafana
+    dest: /home/ssilver/configs/
   tags:
     - grafana
 
@@ -45,7 +45,10 @@
     user: "{{ grafana_uid.stdout }}:{{ grafana_gid.stdout }}"
     volumes:
       - /home/ssilver/data/grafana:/var/lib/grafana
-      - /home/ssilver/configs/grafana/grafana-datasources.yml:/etc/grafana/provisioning/datasources/automatic.yml
+      - /home/ssilver/configs/grafana/datasources.yml:/etc/grafana/provisioning/datasources/automatic.yml
+      - /home/ssilver/configs/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/automatic.yml
+      - /home/ssilver/configs/grafana/docker-metrics-dash.json:/etc/grafana/provisioning/dashboards/docker-metrics/dash.json
+      - /home/ssilver/configs/grafana/node-metrics-dash.json:/etc/grafana/provisioning/dashboards/node-metrics/dash.json
     labels:
       traefik.http.routers.grafana.tls: "true"
       traefik.http.routers.grafana.rule: "Host(`grafana.samsilver.ca`)"
@@ -131,6 +134,27 @@
     - prometheus
     - cadvisor
 
+- name: Create Node-Exporter container
+  community.docker.docker_container:
+    name: node-exporter
+    image: prom/node-exporter:latest
+    ports: 9100:9100
+    labels:
+      traefik.enable: "false"
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/host/sys:ro
+      - /proc:/host/proc:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    restart_policy: "always"
+  tags:
+    - prometheus
+    - node-exporter
+
 - name: Create and connect logging network
   community.docker.docker_network:
     name: logging
@@ -140,9 +164,11 @@
       - promtail
       - prometheus
       - cadvisor
+      - node-exporter
   tags:
     - grafana
     - loki
     - promtail
     - prometheus
     - cadvisor
+    - node-exporter
