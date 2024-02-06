@@ -47,8 +47,8 @@
       - /home/ssilver/data/grafana:/var/lib/grafana
       - /home/ssilver/configs/grafana/datasources.yml:/etc/grafana/provisioning/datasources/automatic.yml
       - /home/ssilver/configs/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/automatic.yml
-      - /home/ssilver/configs/grafana/docker-metrics-dash.json:/etc/grafana/provisioning/dashboards/docker-metrics/dash.json
-      - /home/ssilver/configs/grafana/node-metrics-dash.json:/etc/grafana/provisioning/dashboards/node-metrics/dash.json
+      - /home/ssilver/configs/grafana/metrics-dash.json:/etc/grafana/provisioning/dashboards/metrics/general.json
+      - /home/ssilver/configs/grafana/full-node-metrics-dash.json:/etc/grafana/provisioning/dashboards/metrics/full-node.json
     labels:
       traefik.http.routers.grafana.tls: "true"
       traefik.http.routers.grafana.rule: "Host(`grafana.samsilver.ca`)"
