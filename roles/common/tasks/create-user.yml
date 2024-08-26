@@ -51,7 +51,7 @@
 
 - name: Copy contents of config directory
   copy:
-    src: "/home/ssilver/dotfiles/config/"
+    src: "/home/ssilver/dotfiles/"
     dest: "/home/ssilver/.config/"
     owner: ssilver
     group: ssilver

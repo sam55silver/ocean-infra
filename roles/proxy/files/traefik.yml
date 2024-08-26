@@ -1,5 +1,6 @@
 api:
   dashboard: true
+  insecure: true
 
 entryPoints:
   websecure: 
@@ -11,5 +12,7 @@ providers:
   file:
     directory: /etc/traefik/cert-config
     watch: true
-  
+
+metrics:
+  prometheus: {}
 
