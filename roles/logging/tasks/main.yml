@@ -172,3 +172,21 @@
     - prometheus
     - cadvisor
     - node-exporter
+
+- name: Install loki plugin for docker
+  community.docker.docker_plugin:
+    plugin_name: grafana/loki-docker-driver:2.9.4
+    alias: loki
+    state: enable
+
+- name: Copy over daemon.json
+  copy:
+    src: daemon.json
+    dest: /etc/docker/
+  register: copy_result
+
+- name: Restart Docker if copy is completed
+  service:
+    name: docker
+    state: restarted
+  when: copy_result.changed
