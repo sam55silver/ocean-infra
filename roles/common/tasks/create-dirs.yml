@@ -1,0 +1,36 @@
+---
+- name: Create configs directory
+  become: true
+  file:
+    path: /configs
+    owner: ssilver
+    group: infra
+    mode: '0775'
+    state: directory
+
+- name: Create data directory
+  become: true
+  file:
+    path: /data
+    owner: ssilver
+    group: infra
+    mode: '0775'
+    state: directory
+
+- name: Create repos directory
+  become: true
+  file:
+    path: /repos
+    owner: ssilver
+    group: infra
+    mode: '0775'
+    state: directory
+
+- name: Create certs directory
+  become: true
+  file:
+    path: /certs
+    owner: ssilver
+    group: infra
+    mode: '0775'
+    state: directory

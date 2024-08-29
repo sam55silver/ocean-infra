@@ -48,15 +48,17 @@
 - name: Create directory for docker configs
   become: true
   file:
-    path: /home/ssilver/configs
+    path: /configs/docker
     owner: ssilver
-    group: docker
+    group: infra
+    mode: '0755'
     state: directory
 
 - name: Create directory for docker data
   become: true
   file:
-    path: /home/ssilver/data
+    path: /data/docker
     owner: ssilver
-    group: docker
+    group: infra
+    mode: '0755'
     state: directory

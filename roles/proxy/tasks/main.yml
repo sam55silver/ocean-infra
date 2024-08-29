@@ -7,18 +7,10 @@
   tags:
     - docker
 
-- name: Create directory for certificates
-  become: true
-  file:
-    path: /home/ssilver/certs
-    owner: ssilver
-    group: docker
-    state: directory
-
 - name: Create Traefik Config Directory
   become: true
   file:
-    path: /home/ssilver/configs/traefik
+    path: /configs/traefik
     state: directory
     owner: traefik
     group: traefik
@@ -28,22 +20,22 @@
 - name: Copy Traefik Config over
   copy:
     src: traefik.yml
-    dest: /home/ssilver/configs/traefik/
+    dest: /configs/traefik/
 
 - name: Copy Traefik Certificates Config over
   copy:
     src: cert-config.yml
-    dest: /home/ssilver/configs/traefik/
+    dest: /configs/traefik/
 
 - name: Copy Cert over
   copy:
     src: cloudflare.cert
-    dest: /home/ssilver/certs/cloudflare.cert
+    dest: /certs/cloudflare.cert
 
 - name: Copy Cert Key over
   copy:
     src: cloudflare.key
-    dest: /home/ssilver/certs/cloudflare.key
+    dest: /certs/cloudflare.key
 
 - name: Get Traefik UID
   shell: id -u traefik
@@ -62,9 +54,9 @@
       - 443:443
       - 8080:8080
     volumes:
-      - /home/ssilver/configs/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-      - /home/ssilver/configs/traefik/cert-config.yml:/etc/traefik/cert-config/config.yml:ro
-      - /home/ssilver/certs:/certs
+      - /configs/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /configs/traefik/cert-config.yml:/etc/traefik/cert-config/config.yml:ro
+      - /certs:/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
       traefik.http.routers.dashboard.rule: "Host(`traefik.samsilver.ca`)"

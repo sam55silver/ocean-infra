@@ -1,0 +1,6 @@
+---
+- name: Create infra group
+  become: true
+  group:
+    name: infra
+    state: present
