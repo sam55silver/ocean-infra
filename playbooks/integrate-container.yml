@@ -1,0 +1,14 @@
+---
+- name: Clone / Pull repo
+  hosts: the-ocean
+  tasks:
+    - name: Clone repository if it does not exist
+      git:
+        repo: "{{ repo_url }}"
+        dest: "/repos/{{ repo_name }}"
+        version: "{{ repo_version }}"
+        force: yes
+        update: true
+  tags:
+    - clone
+    - pull
