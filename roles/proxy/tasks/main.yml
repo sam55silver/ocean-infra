@@ -45,6 +45,13 @@
   shell: id -g traefik
   register: traefik_gid
 
+- name: Create external Docker network
+  community.docker.docker_network:
+    name: web
+    driver: bridge
+    internal: no
+    state: present
+
 - name: Create Traefik container
   community.docker.docker_container:
     name: traefik
@@ -65,5 +72,7 @@
       traefik.http.routers.dashboard.middlewares: dashboard-auth
       traefik.http.middlewares.dashboard-auth.basicauth.users: "ssilver:{{ SSILVER_PASSWORD | password_hash('md5') }}"
     restart_policy: "always"
+    networks:
+      - name: web
   notify:
     - Restart Docker Service
