@@ -1,14 +1,13 @@
 ---
 - name: Build Docker Image Locally
   community.docker.docker_image_build:
-    name: "{{ image_name }}:{{ image_tag }}"
+    name: "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
     path: "{{ image_path }}"
 
-- name: Tag Docker Image
+- name: Tag Docker Image with latest
   community.docker.docker_image_tag:
-    name: "{{ image_name }}:{{ image_tag }}"
+    name: "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
     repository:
-      - "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
       - "{{ registry_server }}/{{ image_name }}:latest"
 
 - name: Push Image to Registry

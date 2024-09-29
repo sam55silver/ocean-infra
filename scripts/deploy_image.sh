@@ -32,14 +32,9 @@ echo "Image Tag: $IMAGE_TAG"
 
 # Define the path to your Ansible playbook
 # Modify this path if your playbook is located elsewhere
-PLAYBOOK_PATH="/home/ssilver/dev/ocean-infra/cicd.yml"
-
-# Check if the playbook exists
-if [ ! -f "$PLAYBOOK_PATH" ]; then
-    echo "Error: Playbook '$PLAYBOOK_PATH' not found in $CURRENT_DIR."
-    exit 1
-fi
+ANSIBLE_DIR="/home/ssilver/dev/ocean-infra"
 
 # Execute the Ansible playbook with the provided variables
-ansible-playbook "$PLAYBOOK_PATH" \
+ansible-playbook "$ANSIBLE_DIR/cicd.yml" \
+    -i "$ANSIBLE_DIR/inventory.yml" \
     --extra-vars "image_name=$IMAGE_NAME image_tag=$IMAGE_TAG image_path=$CURRENT_DIR"
