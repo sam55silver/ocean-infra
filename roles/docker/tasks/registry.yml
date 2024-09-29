@@ -47,13 +47,13 @@
       - "5025:5000"
     volumes:
       - /data/docker/registry:/var/lib/registry/docker/registry
-      - /configs/registry:/auth/htpasswd
+      - /configs/registry:/auth
     labels:
       traefik.http.routers.registry.tls: "true"
       traefik.http.routers.registry.rule: "Host(`registry.samsilver.ca`)"
     env:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
-      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/registry.password
     networks:
       - name: web
