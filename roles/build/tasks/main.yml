@@ -8,10 +8,10 @@
   community.docker.docker_image_tag:
     name: "{{ image_name }}:{{ image_tag }}"
     repository:
-      - "{{ registry_server}}/{{ image_name }}:{{ image_tag }}"
-      - "{{ registry_server}}/{{ image_name }}:latest"
+      - "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
+      - "{{ registry_server }}/{{ image_name }}:latest"
 
 - name: Push Image to Registry
   community.docker.docker_image_push:
-    name: "{{ registry_server}}/{{ image_name }}:{{ image_tag }}"
+    name: "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
     use_ssh_client: true
