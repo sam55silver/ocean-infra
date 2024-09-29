@@ -32,7 +32,7 @@ echo "Image Tag: $IMAGE_TAG"
 
 # Define the path to your Ansible playbook
 # Modify this path if your playbook is located elsewhere
-PLAYBOOK_PATH="~/dev/ocean-infra/cicd.yml"
+PLAYBOOK_PATH="/home/ssilver/dev/ocean-infra/cicd.yml"
 
 # Check if the playbook exists
 if [ ! -f "$PLAYBOOK_PATH" ]; then
