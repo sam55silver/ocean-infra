@@ -1,4 +1,35 @@
 ---
+- name: Ensure apache2-utils is installed
+  apt:
+    name: apache2-utils
+    state: present
+
+- name: Create auth directory
+  file:
+    path: "/configs/registry"
+    owner: ssilver
+    group: infra
+    state: directory
+    mode: '0755'
+
+- name: Ensure the htpasswd file exists
+  ansible.builtin.file:
+    path: "/configs/registry/registry.password"
+    state: touch
+    mode: '0755'
+    owner: ssilver
+    group: docker
+
+- name: Check if htpasswd file already exists
+  ansible.builtin.stat:
+    path: "/configs/registry/registry.password"
+  register: htpasswd_file_check
+
+- name: Create the htpasswd file with the provided user (only if file didn't exist before)
+  ansible.builtin.command:
+    cmd: htpasswd -b /configs/registry/registry.password {{ registry_username }} {{ registry_password }}
+  when: not htpasswd_file_check.stat.exists
+
 - name: Create external Docker network
   community.docker.docker_network:
     name: web
@@ -13,11 +44,16 @@
     state: started
     restart_policy: always
     published_ports:
-      - "{{ image_registry_port }}:5000"
+      - "5025:5000"
     volumes:
-      - /data/docker/registry:/var/lib/registry
+      - /data/docker/registry:/var/lib/registry/docker/registry
+      - /configs/registry:/auth/htpasswd
     labels:
       traefik.http.routers.registry.tls: "true"
       traefik.http.routers.registry.rule: "Host(`registry.samsilver.ca`)"
+    env:
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
     networks:
       - name: web

@@ -1,5 +1,4 @@
 all:
   hosts:
     the-ocean:
-      image_registry_port: 5000
       ansible_ssh_user: root

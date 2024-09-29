@@ -1,15 +1,36 @@
 ---
-- name: Run Full infra Install
+- name: Setup Common Tools
+  hosts: the-ocean
+  become: true
+  roles:
+    - common
+  tags:
+    - common
+
+- name: Setup Docker
+  hosts: the-ocean
+  become: true
+  vars:
+    distribution_codename: bookworm 
+    server_architecture: amd64
+    registry_username: ssilver
+  vars_prompt:
+    - name: registry_password
+      prompt: "Enter the password for image registry"
+      private: yes
+  roles:
+    - docker
+  tags:
+    - docker
+
+- name: Setup Proxy
   hosts: the-ocean
   become: true
   vars_prompt:
     - name: SSILVER_PASSWORD
       prompt: "Enter the password for ssilver user"
       private: yes
-  vars:
-    distribution_codename: bookworm 
-    server_architecture: amd64
   roles:
-    - common
-    - docker
+    - proxy
+  tags:
     - proxy
