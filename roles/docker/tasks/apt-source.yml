@@ -1,0 +1,20 @@
+---
+- name: Add Docker's official GPG key
+  become: true
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: Download Docker GPG key
+  become: true
+  get_url:
+    url: https://download.docker.com/linux/debian/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+- name: Add Docker repository to Apt sources
+  become: true
+  lineinfile:
+    path: /etc/apt/sources.list.d/docker.list
+    line: "deb [arch={{ server_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ distribution_codename }} stable"
+    create: yes

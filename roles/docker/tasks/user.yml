@@ -1,0 +1,7 @@
+---
+- name: Add ssilver to docker group
+  become: true
+  user:
+    name: ssilver
+    groups: docker
+    append: true

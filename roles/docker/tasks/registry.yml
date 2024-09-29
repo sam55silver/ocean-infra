@@ -1,0 +1,11 @@
+---
+- name: Install Docker Registry container
+  docker_container:
+    name: registry
+    image: registry:latest
+    state: started
+    restart_policy: always
+    published_ports:
+      - "5000:5000"
+    volumes:
+      - /data/docker/registry:/var/lib/registry
