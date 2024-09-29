@@ -1,0 +1,15 @@
+---
+- name: Build and Tag Docker Image to Registry
+  hosts: localhost
+  vars_prompt:
+    - name: image_name
+      prompt: "Enter image name"
+      private: false
+    - name: image_tag
+      prompt: "Enter image tag"
+      private: false
+  vars:
+    image_path: "{{ lookup('env', 'PWD') }}"
+    registry_server: "registry.samsilver.ca"
+  roles:
+    - build

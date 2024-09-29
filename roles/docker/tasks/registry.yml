@@ -1,4 +1,11 @@
 ---
+- name: Create external Docker network
+  community.docker.docker_network:
+    name: web
+    driver: bridge
+    internal: no
+    state: present
+
 - name: Install Docker Registry container
   docker_container:
     name: registry
@@ -9,3 +16,8 @@
       - "{{ image_registry_port }}:5000"
     volumes:
       - /data/docker/registry:/var/lib/registry
+    labels:
+      traefik.http.routers.registry.tls: "true"
+      traefik.http.routers.registry.rule: "Host(`registry.samsilver.ca`)"
+    networks:
+      - name: web
