@@ -5,7 +5,7 @@
     path: /configs/docker
     owner: ssilver
     group: infra
-    mode: '0755'
+    mode: '0775'
     state: directory
 
 - name: Create directory for docker data
@@ -14,5 +14,14 @@
     path: /data/docker
     owner: ssilver
     group: infra
-    mode: '0755'
+    mode: '0775'
+    state: directory
+
+- name: Create directory for docker deployments
+  become: true
+  file:
+    path: /deployments
+    owner: ssilver
+    group: infra
+    mode: '0775'
     state: directory

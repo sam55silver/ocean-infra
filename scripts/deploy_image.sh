@@ -25,16 +25,13 @@ IMAGE_TAG="$2"
 
 # Capture the current directory
 CURRENT_DIR="$(pwd)"
+GIT_URL="$(git config --get remote.origin.url)"
 
 echo "Current Directory: $CURRENT_DIR"
+echo "Git URL: $GIT_URL"
 echo "Image Name: $IMAGE_NAME"
 echo "Image Tag: $IMAGE_TAG"
 
-# Define the path to your Ansible playbook
-# Modify this path if your playbook is located elsewhere
-ANSIBLE_DIR="/home/ssilver/dev/ocean-infra"
-
 # Execute the Ansible playbook with the provided variables
-ansible-playbook "$ANSIBLE_DIR/cicd.yml" \
-    -i "$ANSIBLE_DIR/inventory.yml" \
-    --extra-vars "image_name=$IMAGE_NAME image_tag=$IMAGE_TAG image_path=$CURRENT_DIR"
+ansible-playbook "$ANSIBLE_PLAYBOOK_DIR/cicd.yml" \
+    --extra-vars "image_name=$IMAGE_NAME image_tag=$IMAGE_TAG image_path=$CURRENT_DIR git_url=$GIT_URL"

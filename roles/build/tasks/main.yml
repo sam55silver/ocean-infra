@@ -3,14 +3,21 @@
   community.docker.docker_image_build:
     name: "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
     path: "{{ image_path }}"
+    platform: linux/amd64
 
 - name: Tag Docker Image with latest
   community.docker.docker_image_tag:
     name: "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
     repository:
       - "{{ registry_server }}/{{ image_name }}:latest"
+      - "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
 
 - name: Push Image to Registry
   community.docker.docker_image_push:
     name: "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
+    use_ssh_client: true
+
+- name: Push Latest Image to Registry
+  community.docker.docker_image_push:
+    name: "{{ registry_server }}/{{ image_name }}"
     use_ssh_client: true

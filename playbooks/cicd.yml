@@ -5,3 +5,9 @@
     registry_server: "registry.samsilver.ca"
   roles:
     - build
+
+- name: Deploy Docker Image
+  hosts: the-ocean
+  remote_user: ssilver
+  roles:
+    - deployment

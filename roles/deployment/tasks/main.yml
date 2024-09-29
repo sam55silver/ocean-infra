@@ -1,0 +1,29 @@
+---
+- name: Extract the repository name
+  set_fact:
+    repo_name: "{{ git_url | regex_replace('.*/(.*)\\.git$', '\\1') }}"
+
+- name: Create Deployment Directory for Repo
+  file:
+    dest: "/deployments/{{ repo_name }}"
+    mode: '0775'
+    owner: ssilver
+    group: infra
+    state: directory
+  register: file_output
+
+- name: Clone Repository to Deployments
+  git:
+    repo: "{{ git_url }}"
+    dest: "/deployments/{{ repo_name }}"
+
+- name: Run Docker Compose on Project
+  community.docker.docker_compose_v2:
+    project_src: "/deployments/{{ repo_name }}"
+    pull: always
+
+- name: Display 'create alert' Msg
+  debug:
+    msg: "This is the first deployment of '{{ repo_name }}'! Please make sure a 'container crash' alert is set for this container."
+  when: file_output.changed
+
