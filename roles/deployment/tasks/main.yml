@@ -17,6 +17,11 @@
     repo: "{{ git_url }}"
     dest: "/deployments/{{ repo_name }}"
 
+- name: Re-auth with Registry 
+  community.docker.docker_login:
+    reauthorize: true
+    registry_url: registry.samsilver.ca
+
 - name: Run Docker Compose on Project
   community.docker.docker_compose_v2:
     project_src: "/deployments/{{ repo_name }}"

@@ -46,7 +46,7 @@
     published_ports:
       - "5025:5000"
     volumes:
-      - /data/docker/registry:/var/lib/registry/docker/registry
+      - /data/registry:/var/lib/registry/docker/registry
       - /configs/registry:/auth
     labels:
       traefik.http.routers.registry.tls: "true"
