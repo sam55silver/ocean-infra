@@ -13,9 +13,7 @@
       - "{{ registry_server }}/{{ image_name }}:{{ image_tag }}"
 
 - name: Re-auth with Registry 
-  community.docker.docker_login:
-    reauthorize: true
-    registry_url: registry.samsilver.ca
+  ansible.builtin.shell: "docker login {{ registry_server }}"
 
 - name: Push Image to Registry
   community.docker.docker_image_push:

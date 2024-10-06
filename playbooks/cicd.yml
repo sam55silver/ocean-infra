@@ -9,5 +9,7 @@
 - name: Deploy Docker Image
   hosts: the-ocean
   remote_user: ssilver
+  vars:
+    registry_server: "registry.samsilver.ca"
   roles:
     - deployment
