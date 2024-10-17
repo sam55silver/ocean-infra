@@ -33,5 +33,5 @@ echo "Image Name: $IMAGE_NAME"
 echo "Image Tag: $IMAGE_TAG"
 
 # Execute the Ansible playbook with the provided variables
-ansible-playbook "$ANSIBLE_PLAYBOOK_DIR/cicd.yml" \
+ansible-playbook "$ANSIBLE_PLAYBOOK_DIR/cicd.yml" -i "$ANSIBLE_PLAYBOOK_DIR/inventory.yml" \
     --extra-vars "image_name=$IMAGE_NAME image_tag=$IMAGE_TAG image_path=$CURRENT_DIR git_url=$GIT_URL"
