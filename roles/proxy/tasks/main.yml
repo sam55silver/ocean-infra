@@ -55,7 +55,7 @@
 - name: Create Traefik container
   community.docker.docker_container:
     name: traefik
-    image: traefik:v2.10
+    image: traefik:v3
     ports: 
       - 80:80
       - 443:443
