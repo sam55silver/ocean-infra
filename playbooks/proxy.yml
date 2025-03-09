@@ -1,0 +1,11 @@
+- name: Setup Proxy
+  hosts: the-ocean
+  become: true
+  vars_prompt:
+    - name: SSILVER_PASSWORD
+      prompt: "Enter the password for ssilver user"
+      private: yes
+  roles:
+    - proxy
+  tags:
+    - proxy
